@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crescendo · Aprende ciberseguridad jugando</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="hud">
+  <div class="logo">Cresc<span>endo</span></div>
+  <div class="xp"><div class="xp-bar"><i id="xpFill"></i></div><b id="xpText">0 XP</b></div>
+</header>
+<main>
+  <section id="home" class="screen active">
+    <h1>Nadie nace sabiendo de ciberseguridad.<br>Aquí se aprende jugando.</h1>
+    <p class="lead">Completa 4 misiones, gana XP y descubre cómo piensan los atacantes… y cómo atraparlos con un honeypot.</p>
+    <div id="map" class="map"></div>
+  </section>
+  <section id="stage" class="screen"></section>
+</main>
+<div id="toast" role="status"></div>
+<script src="js/game.js"></script>
+</body>
+</html>
