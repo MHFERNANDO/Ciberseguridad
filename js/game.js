@@ -8,7 +8,16 @@ function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');se
 function addXP(n){state.xp+=n;toast('+'+n+' XP ⭐');renderHud();save()}
 function renderHud(){$('#xpFill').style.width=Math.min(100,state.xp/MAX_XP*100)+'%';$('#xpText').textContent=state.xp+' XP'}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');scrollTo(0,0)}
-function finish(i){if(!state.done.includes(i)){state.done.push(i);addXP(40)}save()}
+function finish(i){
+ const first=!state.done.includes(i);if(first){state.done.push(i);addXP(40)}save();
+ setTimeout(()=>{
+  const last=i>=missions.length-1,o=document.createElement('div');o.className='overlay';
+  o.innerHTML=`<div class="card win"><div class="badge">🎉</div><h2>¡Nivel ${i+1} completado!</h2><p>${first?'¡Ganaste +40 XP! ':''}${last?'¡Completaste todas las misiones!':'Ya puedes seguir con: <b>'+missions[i+1].t+'</b>'}</p><button class="btn" id="wn">${last?'🏆 Ver mi insignia':'▶ Continuar al siguiente nivel'}</button><button class="btn alt" id="wm">🗺️ Volver al mapa</button></div>`;
+  document.body.appendChild(o);
+  $('#wn').onclick=()=>{o.remove();show('#stage');last?final():missions[i+1].run(i+1)};
+  $('#wm').onclick=()=>{o.remove();home()};
+ },900);
+}
 
 const missions=[
  {ico:'⚔️',t:'Atacantes y defensores',d:'Aprende qué es la ciberseguridad',run:m1},
@@ -37,13 +46,16 @@ const wrap=(h)=>{$('#stage').innerHTML=`<button class="back" onclick="home()">�
 /* Misión 1: Cazahackers */
 function m1(i){
  const T=[['Correo falso para robar tu clave','a'],['Verificación en dos pasos','d'],['Virus escondido en un juego','a'],['Actualizar el celular','d'],['Probar miles de claves','a'],['Firewall bloqueando intrusos','d'],['Antivirus activo','d'],['Mensaje falso del banco','a']];
- let zap=0,lives=3,tick=0,over=false;const live=[];
- wrap(`<h2>Misión 1: Cazahackers</h2><p>Los <b>atacantes</b> intentan robar o dañar. Los <b>defensores</b> nos protegen. Toca solo los <b>ataques</b> antes de que lleguen al fondo. ¡No toques las defensas! Elimina 8.</p><div class="arena" id="ar"></div><div class="fb" id="fb"></div><div id="end"></div>`);
+ let zap=0,lives=3,tick=0,over=false,started=false;const live=[];
+ wrap(`<h2>Misión 1: Cazahackers</h2><p>Los <b>atacantes</b> intentan robar o dañar. Los <b>defensores</b> nos protegen. Toca solo los <b>ataques</b> antes de que lleguen al fondo. ¡No toques las defensas! Elimina 8. Lee con calma: el juego empieza cuando pulses el botón.</p><div class="arena" id="ar"></div><div class="fb" id="fb"></div><div id="end"></div>`);
  const ar=$('#ar'),hud=()=>$('#fb').innerHTML=`Eliminados: ${zap}/8 &nbsp; Vidas: ${'❤️'.repeat(Math.max(lives,0))}`;hud();
+ ar.innerHTML='<button class="btn" id="st1" style="display:block;margin:150px auto 0">▶ ¡Listo, empezar!</button>';
+ $('#st1').onclick=()=>{ar.innerHTML='';started=true};
  function end(w){over=true;ar.innerHTML='';$('#end').innerHTML=w?'<p class="ok">¡Zona limpia! Ya distingues quién ataca y quién defiende.</p><button class="btn" onclick="home()">Volver al mapa</button>':'<p class="bad">Los hackers ganaron esta vez.</p><button class="btn" id="rt">Reintentar</button>';if(w)finish(i);else $('#rt').onclick=()=>m1(i)}
  const hit=m=>{lives--;toast(m);hud();if(lives<=0)end(false)};
  const iv=setInterval(()=>{
   if(!document.body.contains(ar)||over){clearInterval(iv);return}
+  if(!started)return;
   tick++;
   if(tick%40===1){const [t,k]=T[Math.floor(Math.random()*T.length)],e=document.createElement('button'),o={e,k,y:-50};e.className='fall';e.textContent=t;e.style.left=Math.random()*55+'%';e.style.top='-50px';
    e.onclick=()=>{if(over||o.dead)return;o.dead=true;e.remove();if(k==='a'){zap++;addXP(4);hud();if(zap>=8)end(true)}else hit('🛡️ Eso era una defensa, ¡nos protege!')};ar.appendChild(e);live.push(o)}
@@ -84,8 +96,8 @@ function m3(i){
  ['seguridad@tu-universidad.edu','Cambio de clave solicitado','Si fuiste tú, ignora este aviso. Si no, entra a la web oficial.',0,'No pide datos ni trae enlaces; te manda a la web oficial'],
  ['rrhh@empresa-ayuda.net','Tu rol de pagos','Abre el adjunto: rol_de_pagos.exe',1,'Un .exe es un programa, no un documento'],
  ['envios@correos-ec.top','Tu paquete llegó, paga la tasa','Ingresa los datos de tu tarjeta en correos-pago.top',1,'Dominio raro y te piden la tarjeta']].sort(()=>Math.random()-.5);
- let n=0,ok=0,t=100,lock=false;
- wrap(`<h2>Misión 3: Bandeja contrarreloj</h2><p>Llegan 6 correos. Decide rápido: ¿<b>phishing</b> (estafa) o <b>seguro</b>? Necesitas 5 aciertos.</p><div id="mail"></div><div class="fb" id="fb"></div><div id="end"></div>`);
+ let n=0,ok=0,t=100,lock=true;
+ wrap(`<h2>Misión 3: Bandeja contrarreloj</h2><p>Llegan 6 correos. Tendrás unos segundos por correo para decidir si es <b>phishing</b> (estafa) o <b>seguro</b>. Necesitas 5 aciertos. Lee con calma y pulsa el botón cuando estés listo: el tiempo no corre hasta entonces.</p><div id="mail"></div><div class="fb" id="fb"></div><div id="end"></div>`);
  function draw(){
   if(n>=E.length){const w=ok>=5;$('#mail').innerHTML='';$('#end').innerHTML=w?`<p class="ok">¡${ok}/6! Regla de oro: no hagas clic; entra tú mismo a la web oficial.</p><button class="btn" onclick="home()">Volver al mapa</button>`:`<p class="bad">${ok}/6, necesitas 5.</p><button class="btn" id="rt">Reintentar</button>`;if(w)finish(i);else $('#rt').onclick=()=>m3(i);return}
   const e=E[n];t=100;lock=false;$('#fb').textContent='';
@@ -96,7 +108,7 @@ function m3(i){
   $('#fb').className='fb '+(r?'ok':'bad');$('#fb').textContent=(r?'✔ ':a<0?'⏰ Tiempo. ':'✘ ')+e[4];n++;setTimeout(draw,1700)}
  const iv=setInterval(()=>{if(!document.body.contains($('#mail'))){clearInterval(iv);return}
   if(lock||n>=E.length)return;t-=1;const b=$('#tm');if(b)b.style.width=t+'%';if(t<=0)ans(-1)},100);
- draw();
+ $('#mail').innerHTML='<button class="btn" id="st">▶ ¡Estoy listo, empezar!</button>';$('#st').onclick=draw;
 }
 
 /* Misión 4: Despliega tus honeypots */
@@ -133,6 +145,7 @@ function m5(i){
  document.addEventListener('keydown',flap);cv.addEventListener('pointerdown',flap);
  function spawn(){
   const q=Q[order[n]],top=Math.random()<.5?0:1;
+  const qe=$('#q');qe.classList.remove('flash');void qe.offsetWidth;qe.classList.add('flash');
   wall={x:W,ans:top?[q[1][1],q[1][0]]:[q[1][0],q[1][1]],ok:top,got:null,q};
   $('#q').textContent=q[0];
  }
