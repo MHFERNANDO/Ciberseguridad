@@ -107,7 +107,7 @@ function m3(i){
  function ans(a){if(lock)return;lock=true;const e=E[n],r=a===e[3];if(r){ok++;addXP(5)}
   $('#fb').className='fb '+(r?'ok':'bad');$('#fb').textContent=(r?'✔ ':a<0?'⏰ Tiempo. ':'✘ ')+e[4];n++;setTimeout(draw,1700)}
  const iv=setInterval(()=>{if(!document.body.contains($('#mail'))){clearInterval(iv);return}
-  if(lock||n>=E.length)return;t-=1;const b=$('#tm');if(b)b.style.width=t+'%';if(t<=0)ans(-1)},100);
+  if(lock||n>=E.length)return;t-=0.4;const b=$('#tm');if(b)b.style.width=t+'%';if(t<=0)ans(-1)},100);
  $('#mail').innerHTML='<button class="btn" id="st">▶ ¡Estoy listo, empezar!</button>';$('#st').onclick=draw;
 }
 
